@@ -2,13 +2,12 @@ package com.example.stopwatchapp.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -19,15 +18,27 @@ import com.example.stopwatchapp.ui.theme.DarkPurple
 import com.example.stopwatchapp.ui.theme.LightBlue
 import com.example.stopwatchapp.ui.theme.LightPurple
 import com.example.stopwatchapp.viewmodels.TimeEntryViewModel
+import kotlinx.coroutines.delay
 import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
 @Composable
 fun StopwatchView(
-    text: String,
     timeEntries: List<TimeEntry>,
     mTimeEntryViewModel: TimeEntryViewModel
 ) {
+    var currentTime by remember {
+        mutableStateOf(0L)
+    }
+    var isTimerCounting by remember {
+        mutableStateOf(false)
+    }
+    LaunchedEffect(key1 = currentTime, key2 = isTimerCounting) {
+        if (isTimerCounting) {
+            delay(100L)
+            currentTime += 100L
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -51,7 +62,10 @@ fun StopwatchView(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                Text(text = "test", textAlign = TextAlign.Center)
+                Text(
+                    text = getTimeStringFromDouble(currentTime / 1000L),
+                    textAlign = TextAlign.Center
+                )
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -59,7 +73,7 @@ fun StopwatchView(
                 modifier = Modifier
                     .requiredWidth(140.dp)
                     .padding(10.dp),
-                onClick = { },
+                onClick = { isTimerCounting = true },
                 colors = ButtonDefaults.buttonColors(backgroundColor = LightPurple),
                 shape = CircleShape
             ) {
@@ -69,7 +83,7 @@ fun StopwatchView(
                 modifier = Modifier
                     .requiredWidth(140.dp)
                     .padding(10.dp),
-                onClick = { },
+                onClick = { isTimerCounting = false },
                 colors = ButtonDefaults.buttonColors(backgroundColor = LightPurple),
                 shape = CircleShape
             ) {
@@ -81,7 +95,7 @@ fun StopwatchView(
                 modifier = Modifier
                     .requiredWidth(140.dp)
                     .padding(10.dp),
-                onClick = { /*mTimeEntryViewModel.addTimeEntry(tim)*/ },
+                onClick = { mTimeEntryViewModel.addTimeEntry(TimeEntry(currentTime)) },
                 colors = ButtonDefaults.buttonColors(backgroundColor = LightPurple),
                 shape = CircleShape
             ) {
@@ -91,7 +105,10 @@ fun StopwatchView(
                 modifier = Modifier
                     .requiredWidth(140.dp)
                     .padding(10.dp),
-                onClick = { },
+                onClick = {
+                    currentTime = 0L
+                    isTimerCounting = true
+                },
                 colors = ButtonDefaults.buttonColors(backgroundColor = LightPurple),
                 shape = CircleShape
             ) {
@@ -121,7 +138,26 @@ fun StopwatchView(
                 bottomEnd = 20.dp
             )
         ) {
-//            LazyColumn(content = )
+            LazyColumn(
+                modifier = Modifier.padding(5.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                items(items = timeEntries, itemContent = {
+                    Text(text = "Time: " + getTimeStringFromDouble(it.timeElapsed / 1000L))
+                    Divider()
+                })
+            }
         }
     }
 }
+
+private fun getTimeStringFromDouble(time: Long): String {
+    val hours = time % 86400 / 3600
+    val minutes = time % 86400 % 3600 / 60
+    val seconds = time % 86400 % 3600 % 60
+
+    return makeTimeString(hours, minutes, seconds)
+}
+
+private fun makeTimeString(hour: Long, min: Long, sec: Long): String =
+    String.format("%02d:%02d:%02d", hour, min, sec)

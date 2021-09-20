@@ -6,11 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.stopwatchapp.components.StopwatchView
 import com.example.stopwatchapp.ui.theme.StopwatchAppTheme
@@ -32,7 +29,7 @@ class MainActivity : ComponentActivity() {
             StopwatchAppTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    StopwatchView("test", timeEntries, mTodoViewModel)
+                    StopwatchView(timeEntries, mTodoViewModel)
                 }
             }
         }
